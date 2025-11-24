@@ -265,6 +265,44 @@
                             </button>
                         </div>
 
+                        <form action="{{ route('login') }}" method="POST" x-show="authMode === 'login'"
+                            x-transition:enter="transition ease-out duration-300 delay-100"
+                            x-transition:enter-start="opacity-0 transform scale-95"
+                            x-transition:enter-end="opacity-100 transform scale-100">
+
+                            @csrf @error('email')
+                                <div
+                                    class="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl font-bold border border-red-100">
+                                    ⚠️ {{ $message }}
+                                </div>
+                            @enderror
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1 ml-1">Email Kampus</label>
+                                    <input type="email" name="email" value="{{ old('email') }}" required
+                                        placeholder="nama@student.telkomuniversity.ac.id"
+                                        class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1 ml-1">Kata Sandi</label>
+                                    <input type="password" name="password" required placeholder="••••••••"
+                                        class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-200 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm">
+                                </div>
+
+                                <div class="flex justify-end">
+                                    <a href="#" class="text-xs font-bold text-blue-600 hover:underline">Lupa
+                                        sandi?</a>
+                                </div>
+
+                                <button type="submit"
+                                    class="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-200 transition transform hover:scale-[1.02]">
+                                    Masuk Sekarang
+                                </button>
+                            </div>
+                        </form>
+
                         <form action="{{ route('register') }}" method="POST" x-show="authMode === 'register'">
                             @csrf
                             <input type="hidden" name="authMode" value="register">
