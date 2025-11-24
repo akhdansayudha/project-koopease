@@ -96,6 +96,12 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+
+            // --- PERBAIKAN: Settingan Wajib untuk Supabase Pooler (Port 6543) ---
+            'attributes' => [
+                PDO::ATTR_EMULATE_PREPARES => true,
+            ],
+            // --------------------------------------------------------------------
         ],
 
         'sqlsrv' => [
@@ -148,7 +154,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 
