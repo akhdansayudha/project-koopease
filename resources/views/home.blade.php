@@ -184,35 +184,6 @@
                 <a href="#" class="text-sm font-bold text-blue-600 hover:underline">Lihat Semua</a>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-
-                @foreach ($products as $p)
-                    <div class="bg-white rounded-2xl p-4 border border-gray-100 card-hoverable flex flex-col h-full">
-                        <div class="h-40 bg-gray-100 rounded-xl mb-4 overflow-hidden relative group-img">
-                            <img src="{{ $p->gambar_url }}" alt="{{ $p->nama_produk }}"
-                                class="w-full h-full object-cover">
-                        </div>
-
-                        <div class="flex-1 flex flex-col">
-                            <span class="text-xs text-gray-400 mb-1">Stok: {{ $p->stok }}</span>
-
-                            <h4 class="font-bold text-gray-900 text-sm mb-2 line-clamp-2">{{ $p->nama_produk }}</h4>
-
-                            <div class="mt-auto flex justify-between items-center">
-                                <span class="font-bold text-blue-600 text-base">Rp
-                                    {{ number_format($p->harga, 0, ',', '.') }}</span>
-
-                                <button
-                                    class="w-8 h-8 rounded-full bg-gray-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition">
-                                    +
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-            </div>
-
             <div class="h-20"></div>
         </div>
 

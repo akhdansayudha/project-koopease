@@ -24,7 +24,7 @@ class ProductSeeder extends Seeder
                 'deskripsi' => 'Roti panggang lembut isi selai coklat lumer.',
                 'harga' => 2500,
                 'stok' => 50,
-                'gambar_url' => 'https://down-id.img.susercontent.com/file/id-11134207-7r990-ls5583j3e4n558',
+                'gambar_url' => 'images/products/default-empty.jpg',
                 'is_available' => true
             ],
             [
@@ -33,7 +33,7 @@ class ProductSeeder extends Seeder
                 'deskripsi' => 'Teh melati dalam kemasan botol praktis.',
                 'harga' => 4000,
                 'stok' => 30,
-                'gambar_url' => 'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//97/MTA-2766327/teh-pucuk-harum_teh-pucuk-harum-minuman-teh-350-ml_full02.jpg',
+                'gambar_url' => 'images/products/default-empty.jpg',
                 'is_available' => true
             ],
             [
@@ -42,7 +42,7 @@ class ProductSeeder extends Seeder
                 'deskripsi' => 'Pulpen gel hitam anti macet.',
                 'harga' => 3500,
                 'stok' => 100,
-                'gambar_url' => 'https://images.tokopedia.net/img/cache/700/VqbcmM/2021/6/15/4d945f4c-8f19-482d-8877-33d360f76906.jpg',
+                'gambar_url' => 'images/products/default-empty.jpg',
                 'is_available' => true
             ],
             [
@@ -51,7 +51,7 @@ class ProductSeeder extends Seeder
                 'deskripsi' => 'Hoodie bahan cotton fleece nyaman dipakai kuliah.',
                 'harga' => 150000,
                 'stok' => 10,
-                'gambar_url' => 'https://down-id.img.susercontent.com/file/id-11134207-7qul6-lf4j6j6j6j6j6j',
+                'gambar_url' => 'images/products/default-empty.jpg',
                 'is_available' => true
             ]
         ];
