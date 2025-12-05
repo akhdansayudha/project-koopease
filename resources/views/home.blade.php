@@ -157,25 +157,25 @@
                         }
                     ],
                     timer: null,
-                
+
                     init() {
                         this.startAutoSlide();
                     },
-                
+
                     startAutoSlide() {
                         this.timer = setInterval(() => {
                             this.nextSlide();
                         }, 5000);
                     },
-                
+
                     stopAutoSlide() {
                         clearInterval(this.timer);
                     },
-                
+
                     nextSlide() {
                         this.activeSlide = (this.activeSlide + 1) % this.slides.length;
                     },
-                
+
                     prevSlide() {
                         this.activeSlide = (this.activeSlide - 1 + this.slides.length) % this.slides.length;
                     }
@@ -298,12 +298,12 @@
 
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 pb-20">
                 @foreach ($products as $p)
-                    <div @click="openProductModal({ 
+                    <div @click="openProductModal({
                 id: '{{ $p->product_id }}',
-                name: '{{ $p->nama_produk }}', 
-                price: 'Rp {{ number_format($p->harga, 0, ',', '.') }}', 
-                stock: '{{ $p->stok }}', 
-                desc: '{{ $p->deskripsi ?? 'Tidak ada deskripsi.' }}', 
+                name: '{{ $p->nama_produk }}',
+                price: 'Rp {{ number_format($p->harga, 0, ',', '.') }}',
+                stock: '{{ $p->stok }}',
+                desc: '{{ $p->deskripsi ?? 'Tidak ada deskripsi.' }}',
                 image: '{{ $p->gambar_url ? asset($p->gambar_url) : asset('images/products/default-empty.jpg') }}',
                 category: '{{ $p->category->nama_kategori ?? 'Umum' }}',
                 sold: '{{ $p->terjual ?? 0 }} terjual',
@@ -358,12 +358,12 @@
                                     Rp {{ number_format($p->harga, 0, ',', '.') }}
                                 </span>
                                 <button
-                                    @click.stop="openProductModal({ 
+                                    @click.stop="openProductModal({
                                 id: '{{ $p->product_id }}',
-                                name: '{{ $p->nama_produk }}', 
-                                price: 'Rp {{ number_format($p->harga, 0, ',', '.') }}', 
-                                stock: '{{ $p->stok }}', 
-                                desc: '{{ $p->deskripsi ?? 'Tidak ada deskripsi.' }}', 
+                                name: '{{ $p->nama_produk }}',
+                                price: 'Rp {{ number_format($p->harga, 0, ',', '.') }}',
+                                stock: '{{ $p->stok }}',
+                                desc: '{{ $p->deskripsi ?? 'Tidak ada deskripsi.' }}',
                                 image: '{{ $p->gambar_url ? asset($p->gambar_url) : asset('images/products/default-empty.jpg') }}',
                                 category: '{{ $p->category->nama_kategori ?? 'Umum' }}',
                                 sold: '{{ $p->terjual ?? 0 }} terjual',
