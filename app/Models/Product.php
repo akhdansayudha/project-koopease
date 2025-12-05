@@ -21,7 +21,15 @@ class Product extends Model
         'harga',
         'stok',
         'gambar_url',
-        'is_available'
+        'is_available',
+        'terjual'
+    ];
+
+    protected $casts = [
+        'is_available' => 'boolean',
+        'harga' => 'integer',
+        'stok' => 'integer',
+        'terjual' => 'integer',
     ];
 
     // --- TAMBAHKAN INI ---
