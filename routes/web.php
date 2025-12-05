@@ -29,6 +29,10 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/kategori/{slug}', [CategoryController::class, 'show'])->name('kategori');
 Route::get('/search', [HomeController::class, 'search'])->name('search');
 Route::get('/api/search-suggestions', [HomeController::class, 'getSuggestions'])->name('api.search.suggestions');
+Route::get('/kebijakan-privasi', [HomeController::class, 'privacy'])->name('privacy');
+Route::get('/syarat-ketentuan', [HomeController::class, 'terms'])->name('terms');
+Route::get('/faq', [HomeController::class, 'faq'])->name('faq');
+Route::get('/tentang-kami', [HomeController::class, 'about'])->name('about');
 
 // Authentication Routes (User Biasa)
 Route::middleware('guest')->group(function () {
@@ -114,6 +118,8 @@ Route::prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
     });
 
     Route::prefix('produk')->name('admin.products.')->group(function () {
+        Route::get('/template/{format}', [ProductController::class, 'downloadTemplate'])->name('template');
+        Route::post('/import', [ProductController::class, 'import'])->name('import');
         Route::get('/', [ProductController::class, 'index'])->name('index');
         Route::post('/', [ProductController::class, 'store'])->name('store');
         Route::put('/{id}', [ProductController::class, 'update'])->name('update');
