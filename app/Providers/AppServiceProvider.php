@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\CartItem;
 use Carbon\Carbon;
 use App\Models\Notification; // Pastikan model ini sudah di-use
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production') || $this->app->environment('local') === false) {
+            URL::forceScheme('https');
+        }
+
         // Set Locale Aplikasi & Carbon ke Indonesia
         config(['app.locale' => 'id']);
         Carbon::setLocale('id');
