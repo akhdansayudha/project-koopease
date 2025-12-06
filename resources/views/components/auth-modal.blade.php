@@ -1,17 +1,37 @@
 <!-- resources/views/components/auth-modal.blade.php -->
 <div x-data="{
-    // Buka modal jika ada error ATAU ada session flash 'open_auth_modal'
     authOpen: {{ $errors->any() || session('open_auth_modal') ? 'true' : 'false' }},
-
-    // Tentukan mode berdasarkan input lama ATAU session flash ATAU default 'login'
     authMode: '{{ old('authMode', session('open_auth_modal', 'login')) }}',
+
+    // --- STATE FORM REGISTER ---
+    regName: '{{ old('name') }}', // Menyimpan Nama
+    regEmailUser: '', // Menyimpan Username Email (sebelum @)
+    regEmailDomain: '@student.telkomuniversity.ac.id', // Default Domain
+    regPassword: '', // Menyimpan Password
+    regTerms: false, // Status Checkbox Terms
+    showPass: false, // Status visibility password
+
+    // --- VALIDASI REALTIME ---
+    get isLengthValid() { return this.regPassword.length >= 8; },
+    get hasNumber() { return /\d/.test(this.regPassword); },
+
+    // Cek apakah SEMUA form sudah diisi dengan benar
+    get isFormValid() {
+        return this.regName.trim() !== '' &&
+            this.regEmailUser.trim() !== '' &&
+            this.isLengthValid &&
+            this.hasNumber &&
+            this.regTerms;
+    },
 
     closeAuthModal() {
         this.authOpen = false;
         setTimeout(() => {
             this.authMode = 'login';
+            // Reset form saat modal ditutup (Optional)
+            this.regPassword = '';
+            this.showPass = false;
         }, 300);
-        document.body.style.overflow = 'auto';
     },
 
     handleBackdropClick(e) {
@@ -19,15 +39,12 @@
             this.closeAuthModal();
         }
     }
-}" x-init="if (authOpen) document.body.style.overflow = 'hidden';
-$watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'auto');"
+}" x-init=""
     @open-auth-modal.window="authMode = $event.detail.mode; authOpen = true;" @keydown.escape="closeAuthModal()">
 
-    <!-- Modal Auth -->
     <template x-if="authOpen">
         <div class="fixed inset-0 z-[60] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
-            <!-- Backdrop -->
             <div x-show="authOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
@@ -57,7 +74,7 @@ $watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'a
                             <p class="text-sm text-gray-500 mt-2">Koperasi mahasiswa dalam genggaman.</p>
                         </div>
 
-                        <!-- Toggle Switch -->
+                        {{-- Toggle Login/Register --}}
                         <div class="bg-gray-100 p-1 rounded-full flex mb-8 relative">
                             <div class="absolute top-1 bottom-1 w-[48%] bg-white rounded-full shadow-sm transition-all duration-300 ease-in-out"
                                 :class="authMode === 'login' ? 'left-1' : 'left-[51%]'"></div>
@@ -74,7 +91,7 @@ $watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'a
                             </button>
                         </div>
 
-                        <!-- LOGIN FORM -->
+                        {{-- FORM LOGIN --}}
                         <form action="{{ route('login') }}" method="POST" x-show="authMode === 'login'"
                             x-transition:enter="transition ease-out duration-300"
                             x-transition:enter-start="opacity-0 transform scale-95"
@@ -103,8 +120,10 @@ $watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'a
                                 <div>
                                     <div class="flex justify-between items-center mb-1.5 ml-1">
                                         <label class="block text-xs font-bold text-gray-700">Kata Sandi</label>
-                                        <a href="#" class="text-xs font-bold text-blue-600 hover:underline">Lupa
-                                            sandi?</a>
+                                        <a href="{{ route('forgot.index') }}"
+                                            class="text-xs font-bold text-blue-600 hover:underline">
+                                            Lupa sandi?
+                                        </a>
                                     </div>
                                     <input type="password" name="password" required placeholder="••••••••"
                                         class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400">
@@ -117,7 +136,7 @@ $watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'a
                             </div>
                         </form>
 
-                        <!-- REGISTER FORM -->
+                        {{-- FORM REGISTER --}}
                         <form action="{{ route('register') }}" method="POST" x-show="authMode === 'register'"
                             x-transition:enter="transition ease-out duration-300"
                             x-transition:enter-start="opacity-0 transform scale-95"
@@ -125,52 +144,121 @@ $watch('authOpen', value => document.body.style.overflow = value ? 'hidden' : 'a
                             @csrf
                             <input type="hidden" name="authMode" value="register">
 
+                            {{-- Hidden input yang menggabungkan User + Domain untuk dikirim ke Backend --}}
+                            <input type="hidden" name="email" :value="regEmailUser + regEmailDomain">
+
                             @if ($errors->any() && old('authMode') == 'register')
                                 <div
-                                    class="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl font-bold border border-red-100 flex gap-2 items-center">
-                                    <i class="bi bi-exclamation-circle-fill"></i>
-                                    {{ $errors->first() }}
+                                    class="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl font-bold border border-red-100 flex flex-col gap-1">
+                                    @foreach ($errors->all() as $error)
+                                        <div class="flex gap-2 items-center">
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+                                            <span>{{ $error }}</span>
+                                        </div>
+                                    @endforeach
                                 </div>
                             @endif
 
                             <div class="space-y-4">
-                                <div
-                                    class="bg-blue-50 text-blue-700 px-4 py-3 rounded-xl text-xs flex gap-2 items-start border border-blue-100">
-                                    <i class="bi bi-info-circle-fill mt-0.5"></i>
-                                    <span class="leading-relaxed font-medium">Gunakan email kampus aktif untuk
-                                        verifikasi otomatis mahasiswa.</span>
-                                </div>
-
+                                {{-- Input Nama --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1.5 ml-1">Nama
                                         Lengkap</label>
-                                    <input type="text" name="name" value="{{ old('name') }}" required
+                                    <input type="text" name="name" x-model="regName" required
                                         placeholder="Nama Lengkap Anda"
                                         class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400">
                                 </div>
 
+                                {{-- Input Email Split (User & Domain) --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1.5 ml-1">Email
                                         Kampus</label>
-                                    <input type="email" name="email" value="{{ old('email') }}" required
-                                        placeholder="nama@student.telkomuniversity.ac.id"
-                                        class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400">
+                                    <div class="flex items-center">
+                                        {{-- Username Input --}}
+                                        <input type="text" x-model="regEmailUser" required
+                                            placeholder="nama_pengguna"
+                                            class="flex-1 w-full h-12 pl-4 pr-2 bg-gray-50 rounded-l-xl border-y border-l border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400 z-10">
+
+                                        {{-- Domain Dropdown --}}
+                                        <div class="relative max-w-[50%]">
+                                            <select x-model="regEmailDomain"
+                                                class="h-12 pl-2 pr-8 bg-gray-100 hover:bg-gray-200 rounded-r-xl border-l border-gray-200 text-xs font-bold text-gray-700 outline-none cursor-pointer appearance-none transition w-full">
+                                                <option value="@student.telkomuniversity.ac.id">
+                                                    @student.telkomuniversity.ac.id</option>
+                                                <option value="@telkomuniversity.ac.id">@telkomuniversity.ac.id
+                                                </option>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                                                <i class="bi bi-chevron-down text-xs"></i>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
+                                {{-- Input Password --}}
                                 <div>
                                     <label class="block text-xs font-bold text-gray-700 mb-1.5 ml-1">Buat Kata
                                         Sandi</label>
-                                    <input type="password" name="password" required placeholder="••••••••"
-                                        class="w-full h-12 px-4 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400">
+                                    <div class="relative">
+                                        <input :type="showPass ? 'text' : 'password'" name="password" required
+                                            x-model="regPassword" placeholder="••••••••"
+                                            class="w-full h-12 pl-4 pr-12 bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition text-sm font-medium placeholder-gray-400">
+
+                                        <button type="button" @click="showPass = !showPass"
+                                            class="absolute inset-y-0 right-0 px-4 flex items-center text-gray-400 hover:text-blue-600 transition cursor-pointer">
+                                            <i class="bi"
+                                                :class="showPass ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                                        </button>
+                                    </div>
+
+                                    {{-- Indikator Realtime Requirements --}}
+                                    <div class="mt-2 ml-1 space-y-1">
+                                        <div class="flex items-center gap-2 text-xs transition-colors duration-200"
+                                            :class="isLengthValid ? 'text-green-600 font-bold' : 'text-gray-400'">
+                                            <i class="bi"
+                                                :class="isLengthValid ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+                                            <span>Minimal 8 karakter</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-xs transition-colors duration-200"
+                                            :class="hasNumber ? 'text-green-600 font-bold' : 'text-gray-400'">
+                                            <i class="bi"
+                                                :class="hasNumber ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+                                            <span>Mengandung setidaknya satu angka</span>
+                                        </div>
+                                    </div>
                                 </div>
 
+                                {{-- Checkbox Terms --}}
+                                <div class="flex items-start gap-3 mt-4">
+                                    <div class="flex items-center h-5">
+                                        <input id="terms" name="terms" type="checkbox" x-model="regTerms"
+                                            required
+                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer">
+                                    </div>
+                                    <label for="terms"
+                                        class="ml-1 text-xs text-gray-500 font-medium leading-relaxed">
+                                        Saya menyetujui
+                                        <a href="{{ route('terms') }}" target="_blank"
+                                            class="text-blue-600 hover:underline font-bold">Syarat & Ketentuan</a>
+                                        serta
+                                        <a href="{{ route('privacy') }}" target="_blank"
+                                            class="text-blue-600 hover:underline font-bold">Kebijakan Privasi</a>
+                                        yang berlaku di KoopEase.
+                                    </label>
+                                </div>
+
+                                {{-- Tombol Submit --}}
                                 <button type="submit"
-                                    class="w-full h-12 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition transform hover:scale-[1.02] mt-2">
-                                    Buat Akun Baru
+                                    class="w-full h-12 bg-gray-900 text-white font-bold rounded-xl shadow-lg transition transform mt-4 flex items-center justify-center gap-2"
+                                    :class="isFormValid ? 'hover:bg-black hover:scale-[1.02]' :
+                                        'opacity-50 cursor-not-allowed shadow-none'"
+                                    :disabled="!isFormValid">
+                                    <span>Buat Akun Baru</span>
+                                    <i class="bi bi-arrow-right" x-show="isFormValid"></i>
                                 </button>
                             </div>
                         </form>
-
                     </div>
                 </div>
             </div>

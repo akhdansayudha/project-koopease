@@ -79,6 +79,7 @@
                             class="w-full h-full bg-gradient-to-b from-blue-50 to-blue-100 rounded-full flex items-center justify-center text-5xl font-extrabold text-blue-600">
                             {{ substr($user->name, 0, 1) }}
                         </div>
+                        {{-- Ikon Edit Foto (Hanya Pemanis) --}}
                         <div
                             class="absolute bottom-1 right-1 bg-gray-900 text-white p-2 rounded-full cursor-pointer hover:bg-blue-600 transition shadow-lg border-2 border-white">
                             <i class="bi bi-camera-fill text-xs block"></i>
@@ -86,23 +87,48 @@
                     </div>
 
                     <h2 class="text-2xl font-extrabold text-gray-900 mb-1">{{ $user->name }}</h2>
-                    <p class="text-gray-500 text-sm mb-8 font-medium">{{ $user->email }}</p>
+                    <p class="text-gray-500 text-sm font-medium">{{ $user->email }}</p>
+
+                    {{-- TAMBAHAN: User ID Badge --}}
+                    <div class="mt-2 mb-8">
+                        <span
+                            class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 border border-gray-200 text-[10px] font-bold text-gray-500 tracking-wide">
+                            <i class="bi bi-hash"></i> ID: {{ $user->id }}
+                        </span>
+                    </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-blue-50 p-3 rounded-2xl border border-blue-100 flex flex-col items-center">
+                        {{-- BOX STATUS / ROLE --}}
+                        <div
+                            class="bg-blue-50 p-3 rounded-2xl border border-blue-100 flex flex-col items-center justify-center min-h-[80px]">
                             <span
                                 class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Status</span>
-                            <div class="flex items-center gap-1 text-blue-700 font-bold">
-                                <i class="bi bi-mortarboard-fill text-sm"></i>
-                                <span>{{ ucfirst($user->role) }}</span>
+                            <div class="flex items-center gap-1.5 text-blue-700 font-bold">
+                                {{-- Logika Ikon Berdasarkan Role --}}
+                                @if ($user->role == 'admin')
+                                    <i class="bi bi-shield-lock-fill text-lg"></i>
+                                @elseif($user->role == 'pegawai')
+                                    <i class="bi bi-briefcase-fill text-lg"></i>
+                                @else
+                                    <i class="bi bi-mortarboard-fill text-lg"></i> {{-- Default Mahasiswa --}}
+                                @endif
+
+                                <span class="text-sm">{{ ucfirst($user->role) }}</span>
                             </div>
                         </div>
-                        <div class="bg-green-50 p-3 rounded-2xl border border-green-100 flex flex-col items-center">
+
+                        {{-- BOX BERGABUNG --}}
+                        <div
+                            class="bg-green-50 p-3 rounded-2xl border border-green-100 flex flex-col items-center justify-center min-h-[80px]">
                             <span
                                 class="text-[10px] font-bold text-green-500 uppercase tracking-wider mb-1">Bergabung</span>
-                            <div class="flex items-center gap-1 text-green-700 font-bold">
-                                <i class="bi bi-calendar-check text-sm"></i>
-                                <span class="text-sm">{{ $user->created_at->translatedFormat('d F Y') }}</span>
+                            <div class="flex flex-col items-center text-green-700 font-bold leading-tight">
+                                {{-- Tanggal --}}
+                                <span class="text-xs">{{ $user->created_at->translatedFormat('d F Y') }}</span>
+                                {{-- Detail Waktu (Jam) --}}
+                                <span class="text-[10px] opacity-70 mt-0.5">
+                                    Pukul {{ $user->created_at->format('H:i') }} WIB
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -128,7 +154,8 @@
                                         class="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 group-focus-within:text-blue-500 transition">
                                         <i class="bi bi-person-fill"></i>
                                     </span>
-                                    <input type="text" name="name" value="{{ old('name', $user->name) }}" required
+                                    <input type="text" name="name" value="{{ old('name', $user->name) }}"
+                                        required
                                         class="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition outline-none font-bold text-gray-800">
                                 </div>
                                 @error('name')

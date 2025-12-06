@@ -3,17 +3,37 @@
 
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        /* Custom scrollbar untuk container notifikasi (jika diperlukan styling tambahan) */
+        .notif-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notif-scroll::-webkit-scrollbar-track {
+            background: #f9fafb;
+        }
+
+        .notif-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .notif-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
 
 <body>
     <nav class="w-full h-20 bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-6 md:px-8 h-full flex items-center justify-between">
 
+            {{-- LOGO --}}
             <a href="{{ route('home') }}" class="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
                 <span class="text-2xl font-bold text-gray-900">KoopEase</span>
             </a>
 
-            <!-- Search Bar (Tetap sama) -->
+            {{-- SEARCH BAR --}}
             <div class="hidden md:block flex-1 max-w-xl mx-8 relative" x-data="{
                 query: '{{ request('query') }}',
                 suggestions: [],
@@ -77,9 +97,11 @@
                 </div>
             </div>
 
+            {{-- RIGHT MENU --}}
             <div class="flex items-center gap-3">
 
                 @auth
+                    {{-- NOTIFICATION DROPDOWN --}}
                     <div x-data="{ notifOpen: false }" class="relative">
                         <button @click="notifOpen = !notifOpen" @click.outside="notifOpen = false"
                             class="relative flex items-center justify-center w-10 h-10 bg-gray-50 hover:bg-gray-100 rounded-full transition text-gray-600 border border-gray-100 mr-2">
@@ -87,87 +109,18 @@
 
                             @if (isset($unreadNotifCount) && $unreadNotifCount > 0)
                                 <span
-                                    class="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white">
+                                    class="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
                                     {{ $unreadNotifCount }}
                                 </span>
                             @endif
                         </button>
 
-                        <div x-show="notifOpen" x-transition:enter="transition ease-out duration-200"
-                            x-transition:enter-start="opacity-0 translate-y-2"
-                            x-transition:enter-end="opacity-100 translate-y-0" style="display: none;"
-                            class="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                        {{-- PANGGIL COMPONENT NOTIFIKASI BARU DISINI --}}
+                        @include('components.notification')
 
-                            <div
-                                class="px-4 py-3 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0 z-10">
-                                <h3 class="font-bold text-sm text-gray-900">Notifikasi</h3>
-                                @if (isset($unreadNotifCount) && $unreadNotifCount > 0)
-                                    <form action="{{ route('notifications.readAll') }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="text-[10px] text-blue-600 font-bold hover:underline">
-                                            Tandai semua dibaca
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-
-                            <div class="max-h-80 overflow-y-auto">
-                                @if (isset($notifications) && count($notifications) > 0)
-                                    @foreach ($notifications as $notif)
-                                        <!-- LOGIKA KLIK: Mengarah ke route 'notifications.read' -->
-                                        <a href="{{ route('notifications.read', $notif->id) }}"
-                                            class="block px-4 py-3 border-b border-gray-50 transition-all duration-200 group
-                                            {{-- LOGIKA VISUAL: Beda warna background dan opacity --}}
-                                            {{ $notif->is_read ? 'bg-white hover:bg-gray-50 opacity-70' : 'bg-blue-50/60 hover:bg-blue-50 border-l-4 border-l-blue-500' }}">
-
-                                            <div class="flex gap-3">
-                                                <div class="mt-1 flex-shrink-0">
-                                                    @if (str_contains(strtolower($notif->message), 'berhasil') || str_contains(strtolower($notif->message), 'siap'))
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                                                            <i class="bi bi-check-circle-fill text-sm"></i>
-                                                        </div>
-                                                    @elseif(str_contains(strtolower($notif->message), 'batal'))
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                                                            <i class="bi bi-x-circle-fill text-sm"></i>
-                                                        </div>
-                                                    @else
-                                                        <div
-                                                            class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                                                            <i class="bi bi-info-circle-fill text-sm"></i>
-                                                        </div>
-                                                    @endif
-                                                </div>
-                                                <div class="flex-1 min-w-0">
-                                                    <p
-                                                        class="text-sm text-gray-800 leading-snug {{ $notif->is_read ? 'font-medium' : 'font-bold' }}">
-                                                        {{ $notif->message }}
-                                                    </p>
-                                                    <p
-                                                        class="text-[10px] mt-1 {{ $notif->is_read ? 'text-gray-400' : 'text-blue-600 font-semibold' }}">
-                                                        {{ $notif->created_at->locale('id')->diffForHumans() }}
-                                                    </p>
-                                                </div>
-                                                @if (!$notif->is_read)
-                                                    <div class="mt-2 w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                                                @endif
-                                            </div>
-                                        </a>
-                                    @endforeach
-                                @else
-                                    <div class="px-4 py-8 text-center flex flex-col items-center justify-center">
-                                        <div
-                                            class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-2">
-                                            <i class="bi bi-bell-slash text-gray-400 text-xl"></i>
-                                        </div>
-                                        <p class="text-xs text-gray-500 font-medium">Belum ada notifikasi</p>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
                     </div>
 
+                    {{-- CART BUTTON --}}
                     <a href="{{ route('cart.index') }}"
                         class="relative flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition text-sm font-bold border border-blue-100">
                         <span>🛍️</span>
@@ -181,6 +134,7 @@
                         @endif
                     </a>
 
+                    {{-- USER MENU --}}
                     <div x-data="{ dropdownOpen: false }" class="relative ml-2">
                         <button @click="dropdownOpen = !dropdownOpen" @click.outside="dropdownOpen = false"
                             class="flex items-center gap-2 pl-4 pr-2 py-1.5 bg-white border border-gray-200 rounded-full hover:shadow-md transition cursor-pointer">

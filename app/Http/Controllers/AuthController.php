@@ -49,15 +49,42 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8', // Hapus confirmed jika form tidak ada konfirmasi
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                // Validasi Domain
+                function ($attribute, $value, $fail) {
+                    if (!preg_match('/@(student\.)?telkomuniversity\.ac\.id$/', $value)) {
+                        $fail('Gunakan email resmi Telkom University.');
+                    }
+                },
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[0-9]/',
+            ],
+            'terms' => 'required|accepted',
+        ], [
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.regex' => 'Kata sandi harus mengandung minimal satu angka.',
+            'terms.accepted' => 'Anda harus menyetujui Syarat & Ketentuan.',
         ]);
+
+        // --- LOGIKA PENENTUAN ROLE OTOMATIS ---
+        // Cek apakah email mengandung '@student.'
+        $isStudent = str_contains($request->email, '@student.telkomuniversity.ac.id');
+        $role = $isStudent ? 'mahasiswa' : 'pegawai'; // Jika bukan student, anggap pegawai/dosen
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'mahasiswa',
+            'role' => $role, // Gunakan variabel role yang sudah ditentukan
         ]);
 
         Auth::login($user);
