@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# [cite_start]1. Install library (Tambahkan git & curl agar Composer lancar) [cite: 1]
+# 1. Install library
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     unzip \
@@ -8,24 +8,32 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql
 
-# [cite_start]2. Install Composer [cite: 1]
+# 2. Aktifkan Mod Rewrite (WAJIB untuk Routing Laravel)
+# --- BARIS BARU DI SINI ---
+RUN a2enmod rewrite
+# --------------------------
+
+# 3. Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# [cite_start]3. Set folder kerja [cite: 1]
+# 4. Set folder kerja
 WORKDIR /var/www/html
 
-# [cite_start]4. Copy file project (Perhatikan titiknya ada dua: "COPY . .") [cite: 1, 2]
+# 5. Copy semua file
 COPY . .
 
-# [cite_start]5. Set permission (Penting untuk Laravel) [cite: 1]
+# 6. Set permission
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# [cite_start]6. Install dependency (Production mode) [cite: 1]
+# 7. Install dependency
 RUN composer install --no-dev --optimize-autoloader
 
-# [cite_start]7. Atur Apache ke folder public [cite: 1]
+# 8. Atur Apache ke folder public
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# 8. PERBAIKAN UTAMA: Mengatur PORT saat container berjalan (Runtime)
-# Kita hapus perintah "RUN sed..." yang lama, dan ganti dengan script ini:
+# 9. PENTING: Izinkan .htaccess (Override All)
+# Kita update config apache agar membaca file .htaccess Laravel
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+# 10. CMD untuk start server
 CMD sed -i "s/80/$PORT/g" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && docker-php-entrypoint apache2-foreground
