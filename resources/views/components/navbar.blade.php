@@ -23,7 +23,6 @@
         }
     </style>
 </head>
-
 <body>
     <nav class="w-full h-20 bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
         <div class="max-w-7xl mx-auto px-6 md:px-8 h-full flex items-center justify-between">
@@ -96,7 +95,6 @@
                     </div>
                 </div>
             </div>
-
             {{-- RIGHT MENU --}}
             <div class="flex items-center gap-3">
 
@@ -117,9 +115,7 @@
 
                         {{-- PANGGIL COMPONENT NOTIFIKASI BARU DISINI --}}
                         @include('components.notification')
-
                     </div>
-
                     {{-- CART BUTTON --}}
                     <a href="{{ route('cart.index') }}"
                         class="relative flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition text-sm font-bold border border-blue-100">
@@ -133,7 +129,6 @@
                             </span>
                         @endif
                     </a>
-
                     {{-- USER MENU --}}
                     <div x-data="{ dropdownOpen: false }" class="relative ml-2">
                         <button @click="dropdownOpen = !dropdownOpen" @click.outside="dropdownOpen = false"
@@ -146,7 +141,6 @@
                                 {{ substr(Auth::user()->name, 0, 1) }}
                             </div>
                         </button>
-
                         <div x-show="dropdownOpen" x-transition:enter="transition ease-out duration-100"
                             x-transition:enter-start="transform opacity-0 scale-95"
                             x-transition:enter-end="transform opacity-100 scale-100" style="display: none;"
@@ -169,7 +163,6 @@
                                 class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition">
                                 <span>⚙️</span> <span>Pengaturan</span>
                             </a>
-
                             <form action="{{ route('logout') }}" method="POST" class="w-full border-t border-gray-100">
                                 @csrf
                                 <button type="submit"
@@ -180,7 +173,6 @@
                         </div>
                     </div>
                 @endauth
-
                 @guest
                     <button @click="$dispatch('open-auth-modal', { mode: 'login' })"
                         class="text-sm font-bold text-gray-700 hover:text-blue-600 px-2 transition">
@@ -196,5 +188,4 @@
         </div>
     </nav>
 </body>
-
 </html>
