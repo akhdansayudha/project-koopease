@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\NotificationController; // Controller Notifikasi User (Public)
+use App\Http\Controllers\ForgotPasswordController;
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -43,6 +44,18 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// Group Route Lupa Sandi
+Route::prefix('lupa-sandi')->group(function () {
+    Route::get('/', [ForgotPasswordController::class, 'index'])->name('forgot.index');
+    Route::post('/kirim-otp', [ForgotPasswordController::class, 'sendOtp'])->name('forgot.sendOtp');
+    Route::post('/verifikasi-otp', [ForgotPasswordController::class, 'verifyOtp'])->name('forgot.verifyOtp');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('forgot.reset');
+});
+
+Route::get('/email/{email}', [ForgotPasswordController::class, 'simulateEmail'])->name('forgot.simulate');
+
 
 // ==========================================
 // AUTHENTICATED USER ROUTES
