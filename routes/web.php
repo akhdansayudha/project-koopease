@@ -45,7 +45,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
 // Group Route Lupa Sandi
 Route::prefix('lupa-sandi')->group(function () {
     Route::get('/', [ForgotPasswordController::class, 'index'])->name('forgot.index');
@@ -55,7 +54,6 @@ Route::prefix('lupa-sandi')->group(function () {
 });
 
 Route::get('/email/{email}', [ForgotPasswordController::class, 'simulateEmail'])->name('forgot.simulate');
-
 
 // ==========================================
 // AUTHENTICATED USER ROUTES
