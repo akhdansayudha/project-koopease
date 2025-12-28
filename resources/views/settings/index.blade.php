@@ -252,7 +252,7 @@
                     confirmText = '';
                     document.body.style.overflow = 'auto';
                 },
-
+        
                 handleBackdropClick(e) {
                     if (e.target === e.currentTarget) {
                         this.closeDeleteModal();

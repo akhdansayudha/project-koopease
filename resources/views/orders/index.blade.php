@@ -41,29 +41,37 @@
     openCancelModal(id, url, items) {
         this.cancelData = { id: id, url: url, items: items };
         this.cancelModalOpen = true;
+        document.body.style.overflow = 'hidden'; // Disable scroll body
     },
     closeCancelModal() {
         this.cancelModalOpen = false;
+        document.body.style.overflow = 'auto'; // Enable scroll body
     },
 
     // --- Logic Modal Beli Lagi ---
     openRebuyModal(items) {
         // Clone item dan tambahkan property 'selected: true' secara default
-        this.rebuyItems = items.map(item => ({ ...item, selected: true }));
+        // Gunakan JSON parse/stringify untuk deep copy agar aman
+        this.rebuyItems = JSON.parse(JSON.stringify(items)).map(item => ({ ...item, selected: true }));
         this.rebuySelectAll = true;
         this.rebuyModalOpen = true;
     },
     closeRebuyModal() {
         this.rebuyModalOpen = false;
+        document.body.style.overflow = 'auto'; // Enable scroll saat modal tutup
     },
     toggleSelectAllRebuy() {
-        // Set semua item selected mengikuti status master checkbox
         this.rebuyItems.forEach(item => item.selected = this.rebuySelectAll);
     },
     updateRebuySelectAllState() {
-        // Cek jika semua item terpilih, maka master checkbox true
         const allSelected = this.rebuyItems.length > 0 && this.rebuyItems.every(item => item.selected);
         this.rebuySelectAll = allSelected;
+    },
+    // Logic Backdrop (Klik di luar modal untuk tutup)
+    handleBackdropClick(e) {
+        if (e.target === e.currentTarget) {
+            this.closeRebuyModal();
+        }
     }
 
 }" @keydown.escape="closeCancelModal(); closeRebuyModal()">
@@ -194,21 +202,26 @@
 
                             {{-- Persiapan Data (Common untuk Cancel dan Rebuy) --}}
                             @php
-                                $itemsForJs = $order->orderItems->map(function ($item) {
-                                    $harga =
-                                        $item->harga_saat_pesan > 0 ? $item->harga_saat_pesan : $item->product->harga;
-                                    return [
-                                        'id' => $item->id, // ID Unik Item
-                                        'product_id' => $item->product_id, // ID Produk untuk cart
-                                        'name' => $item->product->nama_produk,
-                                        'qty' => $item->quantity,
-                                        'price' => $harga,
-                                        'price_formatted' => 'Rp ' . number_format($harga, 0, ',', '.'),
-                                        'image' => $item->product->gambar_url
-                                            ? asset($item->product->gambar_url)
-                                            : asset('images/products/default-empty.jpg'),
-                                    ];
-                                });
+                                $itemsForJs = $order->orderItems
+                                    ->map(function ($item) {
+                                        $harga =
+                                            $item->harga_saat_pesan > 0
+                                                ? $item->harga_saat_pesan
+                                                : $item->product->harga;
+                                        return [
+                                            'id' => $item->id,
+                                            'product_id' => $item->product_id,
+                                            'name' => $item->product->nama_produk ?? 'Produk Dihapus',
+                                            'qty' => $item->quantity,
+                                            'price' => $harga,
+                                            'price_formatted' => 'Rp ' . number_format($harga, 0, ',', '.'),
+                                            'image' =>
+                                                $item->product && $item->product->gambar_url
+                                                    ? asset($item->product->gambar_url)
+                                                    : asset('images/products/default-empty.jpg'),
+                                        ];
+                                    })
+                                    ->values(); // <--- PENTING: Tambahkan ->values() agar index direset jadi 0,1,2 (Array Murni)
                             @endphp
 
                             @if ($order->status == 'menunggu_pembayaran')
@@ -231,7 +244,7 @@
                             @elseif($order->status == 'selesai')
                                 {{-- Tombol Beli Lagi (Trigger Modal Rebuy) --}}
                                 <button type="button"
-                                    class="flex-1 md:flex-none text-center bg-gray-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-700 transition min-w-[140px]"
+                                    class="flex-1 md:flex-none text-center bg-gray-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-700 transition"
                                     @click="openRebuyModal({{ json_encode($itemsForJs) }})">
                                     Beli Lagi
                                 </button>

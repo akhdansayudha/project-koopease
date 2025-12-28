@@ -22,7 +22,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            // Email biasanya tidak boleh diganti sembarangan karena akun kampus,
+            // Email biasanya tidak boleh diganti sembarangan karena akun kampus, 
             // tapi jika ingin fitur ganti email, uncomment baris bawah:
             // 'email' => 'required|email|unique:users,email,'.$user->id,
         ]);
