@@ -4,6 +4,7 @@
     x-transition:leave-end="opacity-0 translate-y-2" style="display: none;"
     class="absolute right-0 mt-3 w-[90vw] md:w-[400px] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60] origin-top-right ring-1 ring-black ring-opacity-5"
     @click.stop>
+
     {{-- HEADER --}}
     <div class="px-5 py-4 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0 z-10">
         <h3 class="font-extrabold text-lg text-gray-900">Notifikasi</h3>
@@ -17,6 +18,7 @@
             </form>
         @endif
     </div>
+
     {{-- LIST --}}
     <div class="max-h-[70vh] overflow-y-auto notif-scroll bg-white">
         @if (isset($notifications) && count($notifications) > 0)
@@ -28,6 +30,7 @@
                     $badgeText = 'text-blue-700';
                     $label = 'Info';
                     $borderClass = 'border-l-transparent'; // Default border
+
                     // Cek Tipe dari Database atau Isi Pesan
                     if ($notif->type == 'order' || str_contains(strtolower($notif->message), 'pesanan')) {
                         $badgeBg = 'bg-green-100';
@@ -38,6 +41,7 @@
                         $badgeText = 'text-red-700';
                         $label = 'Promo';
                     }
+
                     // Style untuk Belum Dibaca (Background sedikit gelap + border kiri)
                     if (!$notif->is_read) {
                         $borderClass = 'border-l-blue-500 bg-slate-50';
@@ -93,4 +97,3 @@
         @endif
     </div>
 </div>
-
