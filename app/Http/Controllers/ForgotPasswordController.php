@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail; // Tambahkan ini
 use App\Models\User;
+use App\Mail\ResetPasswordOtp; // Tambahkan ini
 use Carbon\Carbon;
 
 class ForgotPasswordController extends Controller
@@ -17,7 +19,7 @@ class ForgotPasswordController extends Controller
         return view('auth.forgot-password');
     }
 
-    // 2. Kirim OTP (Generate & Simpan)
+    // 2. Kirim OTP (Generate & Kirim Email Asli)
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -34,31 +36,28 @@ class ForgotPasswordController extends Controller
         DB::table('password_reset_tokens')->where('email', $email)->delete();
 
         // Simpan token baru
-        // PERBAIKAN DISINI: Gunakan toDateTimeString() agar formatnya 'YYYY-MM-DD HH:MM:SS'
-        // tanpa embel-embel timezone, sehingga cocok dengan tipe data TIMESTAMP di PostgreSQL
         DB::table('password_reset_tokens')->insert([
             'email' => $email,
             'token' => $otp,
-            'created_at' => Carbon::now()->toDateTimeString()
+            'created_at' => Carbon::now()
         ]);
 
+        // --- PENGIRIMAN EMAIL (UPDATED) ---
+        try {
+            Mail::to($email)->send(new ResetPasswordOtp($otp));
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Gagal mengirim email. Pastikan koneksi internet stabil.']);
+        }
+
+        // Redirect kembali ke halaman forgot-password tapi dengan step 2 (Input OTP)
+        // Kita tidak lagi me-return view 'simulate-email'
         return back()
             ->with('step', 2)
             ->with('email', $email)
-            ->with('success', "Kode OTP telah dikirimkan ke email $email");
+            ->with('success', 'Kode OTP telah dikirim ke email Anda.');
     }
 
-    // 3. Simulasi Buka Email
-    public function simulateEmail($email)
-    {
-        $tokenData = DB::table('password_reset_tokens')
-            ->where('email', $email)
-            ->first();
-
-        return view('auth.simulate-email', compact('tokenData', 'email'));
-    }
-
-    // 4. Verifikasi OTP
+    // 3. Verifikasi OTP
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -75,14 +74,13 @@ class ForgotPasswordController extends Controller
             return back()->with('step', 2)->with('email', $request->email)->withErrors(['otp' => 'Kode OTP salah.']);
         }
 
-        // Parse waktu dari database
-        // Karena di database sudah string 'Y-m-d H:i:s', Carbon akan memparsingnya sesuai config timezone aplikasi
+        // Cek Kadaluarsa (Misal 5 menit)
         $createdAt = Carbon::parse($check->created_at);
-
-        if ($createdAt->addMinutes(2)->isPast()) {
-            return back()->with('step', 2)->with('email', $request->email)->withErrors(['otp' => 'Kode OTP sudah kadaluarsa (Maks. 2 menit). Silakan kirim ulang.']);
+        if ($createdAt->addMinutes(5)->isPast()) {
+            return back()->with('step', 2)->with('email', $request->email)->withErrors(['otp' => 'Kode OTP sudah kadaluarsa. Silakan kirim ulang.']);
         }
 
+        // Jika Sukses, lanjut ke step 3 (Input Password Baru)
         return back()
             ->with('step', 3)
             ->with('email', $request->email)
@@ -90,7 +88,7 @@ class ForgotPasswordController extends Controller
             ->with('success', 'OTP valid! Silakan buat kata sandi baru.');
     }
 
-    // 5. Reset Password Akhir
+    // 4. Reset Password Akhir
     public function resetPassword(Request $request)
     {
         $request->validate([
@@ -99,20 +97,28 @@ class ForgotPasswordController extends Controller
             'otp_code' => 'required'
         ]);
 
+        // Verifikasi lagi untuk keamanan ganda
         $check = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->where('token', $request->otp_code)
             ->first();
 
         if (!$check) {
-            return back()->with('error', 'Token tidak valid.');
+            return back()->with('error', 'Token tidak valid atau sesi habis.');
         }
 
+        // Update Password User
         User::where('email', $request->email)
             ->update(['password' => Hash::make($request->password)]);
 
+        // Hapus Token agar tidak bisa dipakai lagi
         DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-        return redirect()->route('home')->with('open_auth_modal', 'login')->with('success', 'Kata sandi berhasil diubah! Silakan login.');
+        // Redirect ke Home dengan modal login terbuka
+        return redirect()->route('home')
+            ->with('success', 'Kata sandi berhasil diubah! Silakan login.')
+            ->with('open_login_modal', true);
+        // Pastikan di home.blade.php Anda menangkap session 'open_login_modal' 
+        // untuk membuka popup login otomatis (optional)
     }
 }

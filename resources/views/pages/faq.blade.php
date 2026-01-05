@@ -367,6 +367,7 @@
     </div>
 
     @include('components.footer')
+    @include('components.auth-modal')
 
     {{-- Update Active Link di Footer --}}
     <script>

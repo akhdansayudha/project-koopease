@@ -113,11 +113,7 @@
                 <div class="text-center mb-6">
                     <h2 class="text-2xl font-extrabold text-gray-900">Verifikasi OTP</h2>
                     <p class="text-gray-500 text-sm mt-2">
-                        Silakan cek email Anda atau buka simulasi: <br>
-                        <a href="{{ route('forgot.simulate', session('email')) }}" target="_blank"
-                            class="text-blue-600 font-bold hover:underline">
-                            Buka Email Simulasi ↗
-                        </a>
+                        Silakan buka email Anda untuk cek kode OTP yang dikirimkan. <br>
                     </p>
                 </div>
 
@@ -129,7 +125,7 @@
                         <label class="block text-xs font-bold text-gray-700 mb-2 ml-1">Kode OTP (6 Digit)</label>
                         <input type="text" name="otp" required placeholder="123456" maxlength="6"
                             class="w-full h-12 px-4 text-center tracking-[0.5em] text-lg font-mono bg-gray-50 rounded-xl border border-transparent focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition font-bold">
-                        <p class="text-[10px] text-gray-400 mt-2 text-center">Kode hanya berlaku selama 2 menit.</p>
+                        <p class="text-[10px] text-gray-400 mt-2 text-center">Kode hanya berlaku selama 5 menit.</p>
                     </div>
 
                     <button type="submit"
